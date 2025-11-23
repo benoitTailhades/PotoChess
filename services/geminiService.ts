@@ -3,13 +3,12 @@ import { AIMoveResponse } from "../types";
 
 export const getGeminiMove = async (fen: string, validMoves: string[]): Promise<AIMoveResponse> => {
   try {
-    // Guidelines require using process.env.API_KEY exclusively
+    // According to coding guidelines, API key must be strictly from process.env.API_KEY
     const apiKey = process.env.API_KEY;
     
     if (!apiKey) {
         console.warn("API Key 'API_KEY' is missing in process.env");
-        // Throwing error to trigger the catch block fallback
-        throw new Error("Missing API Key");
+        throw new Error("API_KEY manquante dans les variables d'environnement.");
     }
 
     const ai = new GoogleGenAI({ apiKey });
@@ -22,7 +21,7 @@ export const getGeminiMove = async (fen: string, validMoves: string[]): Promise<
       The valid legal moves in SAN (Standard Algebraic Notation) are: ${validMoves.join(', ')}.
       
       Analyze the position and choose the absolute best move to win or draw if losing. 
-      Provide a brief, witty, or strategic commentary  on why you chose this move (max 1 sentence).`,
+      Provide a brief, witty, or strategic commentary on why you chose this move (max 1 sentence).`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
@@ -49,10 +48,10 @@ export const getGeminiMove = async (fen: string, validMoves: string[]): Promise<
 
   } catch (error) {
     console.error("Gemini Chess Error:", error);
-    // Fallback if AI fails
+    // Fallback silencieux si l'IA échoue pour ne pas bloquer le jeu
     return {
       bestMove: validMoves[Math.floor(Math.random() * validMoves.length)],
-      commentary: "Je suis un peu distrait... essayons ça.",
+      commentary: "Je n'arrive pas à me connecter à mon cerveau (Vérifiez la clé API)... je joue au hasard !",
     };
   }
 };

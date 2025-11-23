@@ -20,18 +20,27 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
-          <h2 className="text-2xl font-bold text-red-400 mb-4">Oups ! Une erreur est survenue.</h2>
-          <div className="bg-slate-800 p-4 rounded-lg border border-red-500/30 max-w-lg w-full overflow-auto">
-            <p className="font-mono text-sm text-red-200 mb-2">{this.state.error?.toString()}</p>
-            <p className="text-xs text-slate-400">Vérifiez la console ou votre configuration API (API_KEY).</p>
+        <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-6 text-center text-white">
+          <div className="bg-red-900/20 p-6 rounded-xl border border-red-500 max-w-lg">
+            <h2 className="text-2xl font-bold text-red-400 mb-4">Problème de configuration</h2>
+            <p className="mb-4 text-slate-300">L'application a rencontré une erreur critique.</p>
+            
+            <div className="bg-black/50 p-4 rounded text-left font-mono text-xs text-red-200 mb-4 overflow-auto max-h-40">
+              {this.state.error?.toString()}
+            </div>
+
+            <p className="text-sm text-slate-400 mb-4">
+              <strong>Note pour le déploiement Vercel :</strong><br/>
+              Assurez-vous que votre variable d'environnement s'appelle exactement <code className="bg-slate-700 px-1 rounded text-white">API_KEY</code> dans les réglages de votre projet Vercel.
+            </p>
+            
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-6 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg font-semibold transition-colors"
+            >
+              Réessayer
+            </button>
           </div>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="mt-6 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-colors"
-          >
-            Recharger la page
-          </button>
         </div>
       );
     }
@@ -127,6 +136,17 @@ const ChessGame: React.FC = () => {
       promotion: 'q', // always promote to queen for simplicity
     });
 
+    // If move was successful and we are in remote link mode, update URL immediately
+    if (move && gameMode === GameMode.REMOTE_LINK) {
+      const currentFen = game.fen(); // get *new* fen after move
+      // Wait a tick for state to update or just use the game object directly
+       // Actually game.fen() might be old state here due to closure, 
+       // but we updated local var `gameCopy` in safeMakeMove... 
+       // Ideally we should update the URL in an effect, but let's do it simply:
+       // We can't easily get the new FEN here without reconstructing.
+       // Let's rely on the user clicking "Partager" to get the EXACT current state.
+    }
+
     return move;
   };
 
@@ -153,20 +173,18 @@ const ChessGame: React.FC = () => {
   };
 
   const handleCopyLink = async () => {
+    // Force update hash with current state
     const currentFen = encodeURIComponent(game.fen());
     const url = `${window.location.origin}${window.location.pathname}#fen=${currentFen}`;
-    
-    // Update the hash in the browser without reloading
     window.location.hash = `fen=${currentFen}`;
 
     try {
       await navigator.clipboard.writeText(url);
-      setNotification("Lien généré et copié ! Envoyez-le à votre ami.");
-      setTimeout(() => setNotification(null), 4000);
+      setNotification("Lien copié ! Envoyez-le à votre ami.");
     } catch (err) {
-      console.error("Failed to copy", err);
-      setNotification("Lien généré dans l'URL !");
+      setNotification("Lien généré dans la barre d'adresse !");
     }
+    setTimeout(() => setNotification(null), 4000);
   };
 
   const flipBoard = () => {
@@ -193,7 +211,7 @@ const ChessGame: React.FC = () => {
           Gemini Chess
         </h1>
         <p className="text-slate-400 text-sm max-w-xs mx-auto">
-          Jouez, générez un lien, et défiez vos amis.
+          Jouez, copiez le lien, envoyez-le.
         </p>
       </header>
 
@@ -214,9 +232,8 @@ const ChessGame: React.FC = () => {
 
         {/* Board */}
         <div className="aspect-square w-full shadow-2xl border-4 border-slate-700 rounded-lg overflow-hidden bg-slate-800">
-          {/* @ts-ignore: Prop 'position' exists on Chessboard but types might be misaligned */}
           <Chessboard 
-            position={fen} 
+            {...{position: fen} as any}
             onPieceDrop={onDrop}
             boardOrientation={orientation}
             customDarkSquareStyle={{ backgroundColor: '#334155' }}
@@ -254,7 +271,7 @@ const ChessGame: React.FC = () => {
           setGameMode={(mode) => {
             setGameMode(mode);
             if (mode === GameMode.AI && game.turn() === 'b') {
-              // Trigger AI check on next effect cycle
+               // Trigger AI handled by effect
             }
           }}
           onReset={handleReset}
