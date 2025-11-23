@@ -17,7 +17,7 @@ export const getGeminiMove = async (fen: string, validMoves: string[]): Promise<
       The valid legal moves in SAN (Standard Algebraic Notation) are: ${validMoves.join(', ')}.
       
       Analyze the position and choose the absolute best move to win or draw if losing. 
-      Provide a brief, witty, or strategic commentary on why you chose this move (max 1 sentence).`,
+      Provide a brief, witty, or strategic commentary  on why you chose this move (max 1 sentence).`,
       config: {
         responseMimeType: "application/json",
         responseSchema: {
