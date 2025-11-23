@@ -1,0 +1,5 @@
+{
+  "name": "GeminiLink Chess",
+  "description": "A chess application enabling Play-by-Link (correspondence) and Play vs Gemini AI. Features a modern UI and AI-powered commentary.",
+  "requestFramePermissions": []
+}
