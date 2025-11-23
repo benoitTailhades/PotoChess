@@ -9,6 +9,12 @@
     <style>
       body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #e2e8f0; }
     </style>
+    <script>
+      // Polyfill process for browser environment to prevent crashes on Vercel
+      if (typeof process === 'undefined') {
+        window.process = { env: {} };
+      }
+    </script>
   <script type="importmap">
 {
   "imports": {

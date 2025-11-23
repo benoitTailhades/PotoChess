@@ -1,9 +1,10 @@
-import { GoogleGenAI, Type, SchemaType } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { AIMoveResponse } from "../types";
 
 // Initialize the Gemini Client
-// The API key is injected via process.env.API_KEY
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Using the specific variable 'clefAPI' as requested by the user.
+// The process polyfill in index.html prevents crashes if env is missing.
+const ai = new GoogleGenAI({ apiKey: process.env.clefAPI });
 
 export const getGeminiMove = async (fen: string, validMoves: string[]): Promise<AIMoveResponse> => {
   try {
@@ -46,7 +47,7 @@ export const getGeminiMove = async (fen: string, validMoves: string[]): Promise<
     // Fallback if AI fails
     return {
       bestMove: validMoves[Math.floor(Math.random() * validMoves.length)],
-      commentary: "I'm distracted... let's try this.",
+      commentary: "Je suis un peu distrait... essayons ça.",
     };
   }
 };
