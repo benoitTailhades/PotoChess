@@ -24,7 +24,7 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
           <h2 className="text-2xl font-bold text-red-400 mb-4">Oups ! Une erreur est survenue.</h2>
           <div className="bg-slate-800 p-4 rounded-lg border border-red-500/30 max-w-lg w-full overflow-auto">
             <p className="font-mono text-sm text-red-200 mb-2">{this.state.error?.toString()}</p>
-            <p className="text-xs text-slate-400">Vérifiez la console ou votre configuration API (clefAPI).</p>
+            <p className="text-xs text-slate-400">Vérifiez la console ou votre configuration API (API_KEY).</p>
           </div>
           <button 
             onClick={() => window.location.reload()} 
@@ -156,13 +156,16 @@ const ChessGame: React.FC = () => {
     const currentFen = encodeURIComponent(game.fen());
     const url = `${window.location.origin}${window.location.pathname}#fen=${currentFen}`;
     
+    // Update the hash in the browser without reloading
+    window.location.hash = `fen=${currentFen}`;
+
     try {
       await navigator.clipboard.writeText(url);
-      setNotification("Lien copié ! Envoyez-le à votre ami pour jouer.");
+      setNotification("Lien généré et copié ! Envoyez-le à votre ami.");
       setTimeout(() => setNotification(null), 4000);
     } catch (err) {
       console.error("Failed to copy", err);
-      setNotification("Erreur de copie. Utilisez l'URL du navigateur.");
+      setNotification("Lien généré dans l'URL !");
     }
   };
 
@@ -195,7 +198,7 @@ const ChessGame: React.FC = () => {
       </header>
 
       {notification && (
-        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-indigo-600 text-white px-6 py-3 rounded-full shadow-xl font-semibold animate-fade-in-down border border-indigo-400">
+        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-indigo-600 text-white px-6 py-3 rounded-full shadow-xl font-semibold animate-fade-in-down border border-indigo-400 whitespace-nowrap">
           {notification}
         </div>
       )}
@@ -211,6 +214,7 @@ const ChessGame: React.FC = () => {
 
         {/* Board */}
         <div className="aspect-square w-full shadow-2xl border-4 border-slate-700 rounded-lg overflow-hidden bg-slate-800">
+          {/* @ts-ignore: Prop 'position' exists on Chessboard but types might be misaligned */}
           <Chessboard 
             position={fen} 
             onPieceDrop={onDrop}

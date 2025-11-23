@@ -1,13 +1,18 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AIMoveResponse } from "../types";
 
-// Initialize the Gemini Client
-// Using the specific variable 'clefAPI' as requested by the user.
-// The process polyfill in index.html prevents crashes if env is missing.
-const ai = new GoogleGenAI({ apiKey: process.env.clefAPI });
-
 export const getGeminiMove = async (fen: string, validMoves: string[]): Promise<AIMoveResponse> => {
   try {
+    // Guidelines require using process.env.API_KEY exclusively
+    const apiKey = process.env.API_KEY;
+    
+    if (!apiKey) {
+        console.warn("API Key 'API_KEY' is missing in process.env");
+        // Throwing error to trigger the catch block fallback
+        throw new Error("Missing API Key");
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
     const model = 'gemini-2.5-flash';
     
     const response = await ai.models.generateContent({
